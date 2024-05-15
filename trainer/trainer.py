@@ -122,7 +122,7 @@ class PanopticSegmentation(pl.LightningModule):
             ins_preds += 1
             ins_preds[np.isin(sem_preds, range(1, self.config.data.min_stuff_cls_id), invert=True)] = 0
             sem_labels = self.validation_dataset._remap_model_output(label[:, 0])
-            ins_labels = label[:, 1] >> 16
+            ins_labels = label[:, 1]
 
             db_max_instance_id = self.config.model.num_queries
             if self.config.general.dbscan_eps is not None:
@@ -148,20 +148,7 @@ class PanopticSegmentation(pl.LightningModule):
                                 ins_preds[new_mask == cluster_id] = db_max_instance_id
 
             self.max_instance_id = max(db_max_instance_id, self.max_instance_id)
-            for i in range(len(n_point) - 1):
-                indices = range(n_point[i], n_point[i + 1])
-                if i == 0 and self.previous_instances is not None:
-                    current_instances = ins_preds[indices]
-                    associations = associate_instances(self.previous_instances, current_instances)
-                    for id in np.unique(ins_preds):
-                        if associations.get(id) is None:
-                            self.max_instance_id += 1
-                            associations[id] = self.max_instance_id
-                    ins_preds = np.vectorize(associations.__getitem__)(ins_preds)
-                else:
-                    self.class_evaluator.addBatch(sem_preds, ins_preds, sem_labels, ins_labels, indices, seq)
-            if i > 0:
-                self.previous_instances = ins_preds[indices]
+            self.class_evaluator.addBatch(sem_preds, ins_preds, sem_labels, ins_labels, seq)
 
         return {f"val_{k}": v.detach().cpu().item() for k, v in losses.items()}
 

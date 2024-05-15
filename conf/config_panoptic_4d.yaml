@@ -3,7 +3,7 @@ general:
   seed: null
   ckpt_path: null
   project_name: mask4former
-  workspace: kadiryilmaz
+  workspace: julienbinsch
   instance_population: 20
   dbscan_eps: null
   experiment_name: ${now:%Y-%m-%d_%H%M%S}
@@ -11,9 +11,9 @@ general:
   gpus: 1
 
 defaults:
-  - data: kitti
+  - data: rio
   - data/data_loaders: simple_loader
-  - data/datasets: semantic_kitti
+  - data/datasets: rio
   - data/collation_functions: voxelize_collate
   - logging: full
   - model: mask4former

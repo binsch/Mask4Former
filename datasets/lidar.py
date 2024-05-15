@@ -24,7 +24,7 @@ class LidarDataset(Dataset):
         self.add_distance = add_distance
         self.instance_population = instance_population
         self.sweep = sweep
-        self.config = self._load_yaml("conf/semantic-kitti.yaml")
+        self.config = self._load_yaml("conf/rio.yaml")
 
         # loading database file
         database_path = Path(self.data_dir)
@@ -73,26 +73,22 @@ class LidarDataset(Dataset):
         labels_list = []
         acc_num_points = [0]
         for time, scan in enumerate(self.data[idx]):
-            points = np.fromfile(scan["filepath"], dtype=np.float32).reshape(-1, 4)
+            points = np.load(scan["filepath"])
             coordinates = points[:, :3]
             # rotate and translate
             pose = np.array(scan["pose"]).T
             coordinates = coordinates @ pose[:3, :3] + pose[3, :3]
             coordinates_list.append(coordinates)
             acc_num_points.append(acc_num_points[-1] + len(coordinates))
-            features = points[:, 3:4]
+
+            features = points[:, 3:9]
             time_array = np.ones((features.shape[0], 1)) * time
             features = np.hstack((time_array, features))
             features_list.append(features)
-            if "test" in self.mode:
-                labels = np.zeros_like(features).astype(np.int64)
-                labels_list.append(labels)
-            else:
-                panoptic_label = np.fromfile(scan["label_filepath"], dtype=np.uint32)
-                semantic_label = panoptic_label & 0xFFFF
-                semantic_label = np.vectorize(self.config["learning_map"].__getitem__)(semantic_label)
-                labels = np.hstack((semantic_label[:, None], panoptic_label[:, None]))
-                labels_list.append(labels)
+            
+            labels = points[:, 9:].astype(np.int64)
+            labels[:, 0] = np.vectorize(self.config["learning_map"].__getitem__)(labels[:, 0])
+            labels_list.append(labels)
 
         coordinates = np.vstack(coordinates_list)
         features = np.vstack(features_list)
@@ -128,6 +124,9 @@ class LidarDataset(Dataset):
         features = np.hstack((coordinates, features))
 
         labels[:, 0] = np.vectorize(self.label_info.__getitem__)(labels[:, 0])
+
+        if (labels[:, 0] == self.ignore_label).all():
+            print(f"no non-ignore instances in sequence {scan['scene']} with filepaths {[s['filepath'] for s in self.data[idx]]}")
 
         return {
             "num_points": acc_num_points,

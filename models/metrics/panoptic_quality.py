@@ -128,11 +128,12 @@ class Panoptic4DEval:
         PQ4D = math.sqrt(AQ_overall * iou_mean)
         return PQ4D, AQ_overall, AQ[self.include], iou_mean, iou
 
-    def addBatch(self, x_sem, x_inst, y_sem, y_inst, indices, seq):  # x=preds, y=targets
-        x_sem = x_sem[indices]
-        x_inst = x_inst[indices]
-        y_sem = y_sem[indices]
-        y_inst = y_inst[indices]
+    def addBatch(self, x_sem, x_inst, y_sem, y_inst, seq, indices=None):  # x=preds, y=targets
+        if indices is not None:
+            x_sem = x_sem[indices]
+            x_inst = x_inst[indices]
+            y_sem = y_sem[indices]
+            y_inst = y_inst[indices]
 
         # only interested in points that are outside the void area (not in excluded classes)
         gt_not_in_excl_mask = y_sem != self.ignore

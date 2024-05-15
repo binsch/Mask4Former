@@ -1,0 +1,30 @@
+# @package _group_
+
+# these parameters are inherited by datasets, data_loaders and collators
+# but they might be overwritten
+
+# splits
+train_mode: train
+validation_mode: validation
+test_mode: test
+
+# dataset
+ignore_label: 255
+add_distance: false # rio is not a lidar dataset
+in_channels: 6 # 3 color, 3 normal
+num_labels: 18
+instance_population:  ${general.instance_population}
+sweep: 2
+min_stuff_cls_id: 19
+min_points: 50
+class_names: ['cabinet', 'bed', 'chair', 'sofa', 'table', 'door', 'window', 'bookshelf', 'picture',
+'counter', 'desk', 'curtain', 'refridgerator', 'shower_curtain', 'toilet', 'sink', 'bathtub', 'otherfurniture']
+
+# data loader
+pin_memory: true
+num_workers: 4
+batch_size: 4
+test_batch_size: 2
+
+# collation
+voxel_size: 0.05
