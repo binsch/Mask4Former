@@ -124,9 +124,9 @@ learning_map:
   35: 0    # "lamp" mapped to "empty" -----------------------mapped
   36: 17   # "bathtub"
   37: 0    # "dresser" mapped to "empty" -----------------------mapped
-  38: 0    # "dresser" mapped to "empty" -----------------------mapped
+  38: 0    # "otherstructure" mapped to "empty" -----------------------mapped
   39: 18   # "otherfurniture"
-  40: 0    # "dresser" mapped to "empty" -----------------------mapped
+  40: 0    # "otherprop" mapped to "empty" -----------------------mapped
 learning_map_inv: # inverse of previous map
   0: 0
   1: 3
